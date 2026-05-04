@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Gallery | NIKUZE JOSELYNE</title>
+  <meta name="description" content="Photo gallery by NIKUZE JOSELYNE — visual stories from Rwanda and beyond."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
+    .lightbox.open{opacity:1;pointer-events:all;}
+    .lightbox img{max-width:90vw;max-height:85vh;object-fit:contain;border:1px solid var(--black-border);}
+    .lb-close{position:absolute;top:1.5rem;right:1.5rem;color:var(--white);font-size:2rem;cursor:pointer;font-family:var(--font-mono);line-height:1;opacity:0.7;transition:opacity 0.2s;}
+    .lb-close:hover{opacity:1;}
+    .gallery-grid{columns:3;column-gap:3px;}
+    .gallery-item{break-inside:avoid;margin-bottom:3px;overflow:hidden;cursor:pointer;position:relative;}
+    .gallery-item img{width:100%;display:block;transition:transform 0.5s ease,filter 0.3s ease;filter:grayscale(20%);}
+    .gallery-item:hover img{transform:scale(1.04);filter:grayscale(0%);}
+    @media(max-width:768px){.gallery-grid{columns:2;}}
+    @media(max-width:480px){.gallery-grid{columns:1;}}
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-first">NIKUZE</span><span class="logo-last"> JOSELYNE</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="films.html">FILMS</a></li>
+        <li><a href="law.html">LAW</a></li>
+        <li><a href="gallery.html">GALLERY</a></li>
+        <li><a href="about.html">ABOUT</a></li>
+        <li><a href="contact.html" class="nav-cta">CONTACT</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <p class="section-eyebrow">Visual Stories</p>
+      <h1>Gallery</h1>
+      <p>Moments captured between the courtroom and the camera.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:2rem;">
+    <div class="container">
+      <div id="gallery-grid" class="gallery-grid">
+        <div class="work-card skeleton" style="height:300px;break-inside:avoid;margin-bottom:3px;"></div>
+        <div class="work-card skeleton" style="height:200px;break-inside:avoid;margin-bottom:3px;"></div>
+        <div class="work-card skeleton" style="height:250px;break-inside:avoid;margin-bottom:3px;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lb-close" id="lb-close">&#x2715;</span>
+    <img src="" id="lb-img" alt="Gallery image"/>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 Nikuze Joselyne. All rights reserved.</p>
+        <a href="admin/index.html" class="admin-link">Admin</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+    const cfg = {apiKey:"AIzaSyBbudjWIFVdkFbvewv6FNEkfCTJIOhyTA8",authDomain:"nikuzeportfolio.firebaseapp.com",projectId:"nikuzeportfolio",storageBucket:"nikuzeportfolio.firebasestorage.app",messagingSenderId:"158373976578",appId:"1:158373976578:web:080a58461a2bbcb616651b"};
+    const app = initializeApp(cfg);
+    const db = getFirestore(app);
+
+    // Lightbox
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lb-img');
+    document.getElementById('lb-close').addEventListener('click', ()=>lb.classList.remove('open'));
+    lb.addEventListener('click', e=>{ if(e.target===lb) lb.classList.remove('open'); });
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape') lb.classList.remove('open'); });
+
+    function openLightbox(src, alt) { lbImg.src = src; lbImg.alt = alt||''; lb.classList.add('open'); }
+
+    async function loadGallery() {
+      const grid = document.getElementById('gallery-grid');
+      try {
+        const q = query(collection(db,'gallery'), where('status','==','visible'));
+        const snap = await getDocs(q);
+        if (snap.empty) { grid.innerHTML='<p class="empty-msg" style="column-span:all">No photos published yet.</p>'; return; }
+        grid.innerHTML = '';
+        snap.forEach(d => {
+          const item = d.data();
+          const div = document.createElement('div');
+          div.className = 'gallery-item';
+          div.innerHTML = `<img src="${item.imageUrl}" alt="${item.caption||''}" loading="lazy"/>`;
+          div.addEventListener('click', ()=>openLightbox(item.imageUrl, item.caption));
+          grid.appendChild(div);
+        });
+      } catch(e) { grid.innerHTML='<p class="empty-msg">Could not load gallery.</p>'; }
+    }
+    loadGallery();
+  </script>
+</body>
+</html>

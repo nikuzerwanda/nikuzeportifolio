@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>About | NIKUZE JOSELYNE</title>
+  <meta name="description" content="About NIKUZE JOSELYNE — Rwandan law student and filmmaker from Kigali."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-first">NIKUZE</span><span class="logo-last"> JOSELYNE</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="films.html">FILMS</a></li>
+        <li><a href="law.html">LAW</a></li>
+        <li><a href="gallery.html">GALLERY</a></li>
+        <li><a href="about.html">ABOUT</a></li>
+        <li><a href="contact.html" class="nav-cta">CONTACT</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <p class="section-eyebrow">Who I Am</p>
+      <h1>About Me</h1>
+      <p id="about-tagline">Law student & filmmaker from Kigali, Rwanda.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-image-wrap">
+          <div class="about-image-placeholder" id="about-photo-wrap">👤</div>
+        </div>
+        <div class="about-text">
+          <h2 id="about-name">NIKUZE JOSELYNE</h2>
+          <p class="subtitle" id="about-subtitle">Law Student · Filmmaker · Rwanda</p>
+          <p id="about-bio">I live between the courtroom and the camera — framing truth through film while learning how justice is written, argued, and sometimes broken.</p>
+          <p id="about-bio2"></p>
+          <div class="info-grid">
+            <div class="info-item">
+              <label>Citizenship</label>
+              <span id="info-citizenship">Rwandan</span>
+            </div>
+            <div class="info-item">
+              <label>Location</label>
+              <span id="info-location">Kigali, Rwanda</span>
+            </div>
+            <div class="info-item">
+              <label>Email</label>
+              <span><a href="mailto:nikuzejos85@gmail.com" id="info-email" style="color:inherit">nikuzejos85@gmail.com</a></span>
+            </div>
+            <div class="info-item">
+              <label>Phone</label>
+              <span id="info-phone">+250 795 343 820</span>
+            </div>
+          </div>
+          <div style="margin-top:2rem; display:flex; gap:1rem; flex-wrap:wrap;">
+            <a href="contact.html" class="btn btn-primary">GET IN TOUCH</a>
+            <a href="films.html" class="btn btn-ghost">VIEW MY WORK</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vision & Mission -->
+  <section class="section" style="background:var(--black-soft); border-top:1px solid var(--black-border);">
+    <div class="container">
+      <div class="dual-grid">
+        <div class="dual-card">
+          <div class="dual-icon">🔭</div>
+          <h3 id="vision-title">Vision</h3>
+          <p id="vision-text">To use the power of storytelling — both legal and cinematic — to advocate for justice, amplify silenced voices, and document the truth of our time.</p>
+        </div>
+        <div class="dual-divider"></div>
+        <div class="dual-card">
+          <div class="dual-icon">🎯</div>
+          <h3 id="mission-title">Mission</h3>
+          <p id="mission-text">To create films and legal frameworks that hold power accountable, give communities a voice, and bridge the gap between art and justice in Rwanda and Africa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 Nikuze Joselyne. All rights reserved.</p>
+        <a href="admin/index.html" class="admin-link">Admin</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+    const cfg = {apiKey:"AIzaSyBbudjWIFVdkFbvewv6FNEkfCTJIOhyTA8",authDomain:"nikuzeportfolio.firebaseapp.com",projectId:"nikuzeportfolio",storageBucket:"nikuzeportfolio.firebasestorage.app",messagingSenderId:"158373976578",appId:"1:158373976578:web:080a58461a2bbcb616651b"};
+    const app = initializeApp(cfg);
+    const db = getFirestore(app);
+    async function load() {
+      try {
+        const snap = await getDoc(doc(db,'settings','about'));
+        if (!snap.exists()) return;
+        const d = snap.data();
+        if (d.tagline) document.getElementById('about-tagline').textContent = d.tagline;
+        if (d.name) document.getElementById('about-name').textContent = d.name;
+        if (d.subtitle) document.getElementById('about-subtitle').textContent = d.subtitle;
+        if (d.bio) document.getElementById('about-bio').textContent = d.bio;
+        if (d.bio2) document.getElementById('about-bio2').textContent = d.bio2;
+        if (d.citizenship) document.getElementById('info-citizenship').textContent = d.citizenship;
+        if (d.location) document.getElementById('info-location').textContent = d.location;
+        if (d.email) document.getElementById('info-email').textContent = d.email;
+        if (d.phone) document.getElementById('info-phone').textContent = d.phone;
+        if (d.visionTitle) document.getElementById('vision-title').textContent = d.visionTitle;
+        if (d.visionText) document.getElementById('vision-text').textContent = d.visionText;
+        if (d.missionTitle) document.getElementById('mission-title').textContent = d.missionTitle;
+        if (d.missionText) document.getElementById('mission-text').textContent = d.missionText;
+        if (d.photoUrl) {
+          const wrap = document.getElementById('about-photo-wrap');
+          wrap.outerHTML = `<div class="about-image-wrap"><img src="${d.photoUrl}" alt="Nikuze Joselyne"/></div>`;
+        }
+      } catch(e) { console.warn('About data not set yet'); }
+    }
+    load();
+  </script>
+</body>
+</html>
