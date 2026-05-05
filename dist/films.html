@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Films | NIKUZE JOSELYNE</title>
+  <meta name="description" content="Films and video works by NIKUZE JOSELYNE — Rwandan filmmaker exploring truth through documentary and short film."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo"><span class="logo-first">NIKUZE</span><span class="logo-last"> JOSELYNE</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="films.html">FILMS</a></li>
+        <li><a href="law.html">LAW</a></li>
+        <li><a href="gallery.html">GALLERY</a></li>
+        <li><a href="about.html">ABOUT</a></li>
+        <li><a href="contact.html" class="nav-cta">CONTACT</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="page-hero">
+    <div class="container">
+      <p class="section-eyebrow">Cinematography</p>
+      <h1>Films & Visual Works</h1>
+      <p>Documentary storytelling and short films exploring truth, justice, and human experience.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:3rem;">
+    <div class="container">
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" data-cat="all">All</button>
+      </div>
+      <div class="works-grid" id="films-grid">
+        <div class="work-card skeleton"></div>
+        <div class="work-card skeleton"></div>
+        <div class="work-card skeleton"></div>
+        <div class="work-card skeleton"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>&copy; 2025 Nikuze Joselyne. All rights reserved.</p>
+        <a href="admin/index.html" class="admin-link">Admin</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+    const cfg = {apiKey:"AIzaSyBbudjWIFVdkFbvewv6FNEkfCTJIOhyTA8",authDomain:"nikuzeportfolio.firebaseapp.com",projectId:"nikuzeportfolio",storageBucket:"nikuzeportfolio.firebasestorage.app",messagingSenderId:"158373976578",appId:"1:158373976578:web:080a58461a2bbcb616651b"};
+    const app = initializeApp(cfg);
+    const db = getFirestore(app);
+
+    let allFilms = [];
+
+    async function loadFilms() {
+      const grid = document.getElementById('films-grid');
+      const tabs = document.getElementById('filter-tabs');
+      try {
+        const q = query(collection(db, 'films'), where('status','==','visible'));
+        const snap = await getDocs(q);
+        if (snap.empty) { grid.innerHTML='<p class="empty-msg" style="grid-column:1/-1">No films published yet.</p>'; return; }
+        const cats = new Set(['all']);
+        allFilms = [];
+        snap.forEach(d => { const item = {...d.data(), id: d.id}; allFilms.push(item); if(item.category) cats.add(item.category); });
+        // Build tabs
+        tabs.innerHTML = '';
+        cats.forEach(c => {
+          const btn = document.createElement('button');
+          btn.className = 'filter-tab' + (c==='all'?' active':'');
+          btn.dataset.cat = c;
+          btn.textContent = c === 'all' ? 'All' : c;
+          btn.addEventListener('click', () => { tabs.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active')); btn.classList.add('active'); renderFilms(c); });
+          tabs.appendChild(btn);
+        });
+        renderFilms('all');
+      } catch(e) { grid.innerHTML='<p class="empty-msg" style="grid-column:1/-1">Could not load films.</p>'; console.error(e); }
+    }
+
+    function renderFilms(cat) {
+      const grid = document.getElementById('films-grid');
+      const filtered = cat === 'all' ? allFilms : allFilms.filter(f => f.category === cat);
+      if (!filtered.length) { grid.innerHTML='<p class="empty-msg" style="grid-column:1/-1">No items in this category.</p>'; return; }
+      grid.innerHTML = filtered.map(item => `
+        <div class="work-card">
+          <div class="work-card-thumb">
+            ${item.thumbnail ? `<img src="${item.thumbnail}" alt="${item.title}" loading="lazy"/>` : `<div class="thumb-placeholder">🎬</div>`}
+            <div class="work-card-overlay">
+              <a href="${item.sourceLink||'#'}" target="_blank" rel="noopener" class="btn-view">View Work</a>
+            </div>
+          </div>
+          <div class="work-card-info">
+            <span class="work-tag">${item.category||'Film'}</span>
+            <h3>${item.title}</h3>
+          </div>
+        </div>`).join('');
+    }
+    loadFilms();
+  </script>
+</body>
+</html>

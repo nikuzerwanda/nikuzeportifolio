@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>About | Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/admin.css"/>
+</head>
+<body>
+<div class="admin-layout">
+  <div id="sidebar-root"></div>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h2>About Me</h2>
+      <div class="topbar-right"><span class="user-tag" id="user-tag"></span></div>
+    </div>
+    <div class="admin-content">
+      <div class="admin-panel">
+        <div class="panel-header"><h3>Edit About Page</h3></div>
+        <div class="panel-body">
+          <form class="admin-form" id="about-form">
+            <div class="form-row">
+              <div class="form-group"><label>Full Name</label><input id="a-name" placeholder="NIKUZE JOSELYNE"/></div>
+              <div class="form-group"><label>Subtitle / Role</label><input id="a-subtitle" placeholder="Law Student · Filmmaker · Rwanda"/></div>
+            </div>
+            <div class="form-group"><label>Tagline (Hero subtext)</label><input id="a-tagline" placeholder="Law student & filmmaker from Kigali, Rwanda."/></div>
+            <div class="form-group"><label>Photo URL</label><input id="a-photo" type="url" placeholder="https://..."/></div>
+            <div class="form-group"><label>Bio (Paragraph 1)</label><textarea id="a-bio" rows="4" placeholder="Main biography paragraph…"></textarea></div>
+            <div class="form-group"><label>Bio (Paragraph 2 — optional)</label><textarea id="a-bio2" rows="3" placeholder="Additional paragraph…"></textarea></div>
+            <div class="form-row">
+              <div class="form-group"><label>Citizenship</label><input id="a-citizenship" placeholder="Rwandan"/></div>
+              <div class="form-group"><label>Location</label><input id="a-location" placeholder="Kigali, Rwanda"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Email</label><input id="a-email" placeholder="nikuzejos85@gmail.com"/></div>
+              <div class="form-group"><label>Phone</label><input id="a-phone" placeholder="+250 795 343 820"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Vision Title</label><input id="a-vt" placeholder="Vision"/></div>
+              <div class="form-group"><label>Mission Title</label><input id="a-mt" placeholder="Mission"/></div>
+            </div>
+            <div class="form-group"><label>Vision Text</label><textarea id="a-vtext" rows="3"></textarea></div>
+            <div class="form-group"><label>Mission Text</label><textarea id="a-mtext" rows="3"></textarea></div>
+            <button type="submit" class="btn-submit" id="a-submit">SAVE CHANGES</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { requireAuth, setupSignOut, highlightNav, renderSidebar, db, showToast } from './js/admin.js';
+  import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+  document.getElementById('sidebar-root').innerHTML = renderSidebar();
+  requireAuth(); setupSignOut(); highlightNav();
+
+  const fields = ['name','subtitle','tagline','photo','bio','bio2','citizenship','location','email','phone','vt','vtext','mt','mtext'];
+  const dbKeys = ['name','subtitle','tagline','photoUrl','bio','bio2','citizenship','location','email','phone','visionTitle','visionText','missionTitle','missionText'];
+
+  async function load() {
+    try {
+      const snap = await getDoc(doc(db,'settings','about'));
+      if (!snap.exists()) return;
+      const d = snap.data();
+      fields.forEach((f,i) => { const el=document.getElementById('a-'+f); if(el && d[dbKeys[i]]) el.value=d[dbKeys[i]]; });
+    } catch(e) { console.warn('No about data yet'); }
+  }
+
+  document.getElementById('about-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('a-submit'); btn.textContent='SAVING...'; btn.disabled=true;
+    const data = { updatedAt: serverTimestamp() };
+    fields.forEach((f,i) => { const el=document.getElementById('a-'+f); if(el) data[dbKeys[i]]=el.value.trim(); });
+    try {
+      await setDoc(doc(db,'settings','about'), data, {merge:true});
+      showToast('About page saved!');
+    } catch(err) { showToast('Error saving.','error'); }
+    btn.textContent='SAVE CHANGES'; btn.disabled=false;
+  });
+  load();
+</script>
+</body>
+</html>

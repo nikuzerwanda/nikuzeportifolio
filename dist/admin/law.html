@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Law | Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/admin.css"/>
+</head>
+<body>
+<div class="admin-layout">
+  <div id="sidebar-root"></div>
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <h2>Legal Works</h2>
+      <div class="topbar-right"><span class="user-tag" id="user-tag"></span></div>
+    </div>
+    <div class="admin-content">
+      <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:1.5rem;align-items:start;">
+        <div class="admin-panel">
+          <div class="panel-header"><h3 id="form-title">Add Legal Work</h3></div>
+          <div class="panel-body">
+            <form class="admin-form" id="law-form">
+              <input type="hidden" id="l-id"/>
+              <div class="form-group"><label>Title *</label><input id="l-title" placeholder="Essay, case study, article..." required/></div>
+              <div class="form-group"><label>Category</label>
+                <select id="l-cat">
+                  <option>Human Rights</option><option>Criminal Law</option><option>Constitutional Law</option>
+                  <option>International Law</option><option>Essay</option><option>Research</option><option>Other</option>
+                </select>
+              </div>
+              <div class="form-group"><label>Source / Read Link</label><input id="l-link" type="url" placeholder="https://..."/></div>
+              <div class="form-group"><label>Description</label><textarea id="l-desc" placeholder="Brief description…"></textarea></div>
+              <div class="form-group"><label>Status</label>
+                <select id="l-status"><option value="visible">Visible</option><option value="hidden">Hidden</option></select>
+              </div>
+              <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+                <button type="submit" class="btn-submit" id="l-submit">ADD WORK</button>
+                <button type="button" class="btn-submit" id="l-cancel" style="display:none;background:var(--black-border);color:var(--white);">CANCEL</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="admin-panel">
+          <div class="panel-header"><h3>All Legal Works</h3></div>
+          <div class="panel-body"><div id="law-list"><p class="empty-state">Loading…</p></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script type="module">
+  import { requireAuth, setupSignOut, highlightNav, renderSidebar, db, showToast } from './js/admin.js';
+  import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+  document.getElementById('sidebar-root').innerHTML = renderSidebar();
+  requireAuth(); setupSignOut(); highlightNav();
+  let editingId = null;
+
+  async function load() {
+    const el = document.getElementById('law-list');
+    try {
+      const snap = await getDocs(query(collection(db,'law'), orderBy('createdAt','desc')));
+      if (snap.empty) { el.innerHTML='<p class="empty-state">No legal works yet.</p>'; return; }
+      el.innerHTML = '';
+      snap.forEach(d => {
+        const f = d.data();
+        el.innerHTML += `
+          <div class="item-card">
+            <div class="item-thumb">⚖️</div>
+            <div class="item-info">
+              <div class="item-title">${f.title}</div>
+              <div class="item-meta">${f.category||''} · <span class="status-badge ${f.status}">${f.status}</span></div>
+            </div>
+            <div class="item-actions">
+              <button class="btn-icon" onclick="editItem('${d.id}')">✏️</button>
+              <button class="btn-icon danger" onclick="delItem('${d.id}')">🗑️</button>
+            </div>
+          </div>`;
+      });
+    } catch(e) { el.innerHTML='<p class="empty-state">Error loading.</p>'; }
+  }
+
+  document.getElementById('law-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('l-submit'); btn.textContent='SAVING...'; btn.disabled=true;
+    const data = { title: document.getElementById('l-title').value.trim(), category: document.getElementById('l-cat').value, sourceLink: document.getElementById('l-link').value.trim(), description: document.getElementById('l-desc').value.trim(), status: document.getElementById('l-status').value };
+    try {
+      if (editingId) { await updateDoc(doc(db,'law',editingId),{...data,updatedAt:serverTimestamp()}); showToast('Updated!'); cancelEdit(); }
+      else { await addDoc(collection(db,'law'),{...data,createdAt:serverTimestamp()}); showToast('Added!'); e.target.reset(); }
+      load();
+    } catch(err) { showToast('Error.','error'); }
+    btn.textContent = editingId?'UPDATE':'ADD WORK'; btn.disabled=false;
+  });
+
+  window.editItem = async (id) => {
+    const snap = await getDocs(collection(db,'law'));
+    snap.forEach(d => {
+      if (d.id!==id) return;
+      const f=d.data(); editingId=id;
+      document.getElementById('l-title').value=f.title||'';
+      document.getElementById('l-cat').value=f.category||'';
+      document.getElementById('l-link').value=f.sourceLink||'';
+      document.getElementById('l-desc').value=f.description||'';
+      document.getElementById('l-status').value=f.status||'visible';
+      document.getElementById('form-title').textContent='Edit Legal Work';
+      document.getElementById('l-submit').textContent='UPDATE';
+      document.getElementById('l-cancel').style.display='inline-flex';
+    });
+  };
+  window.delItem = async (id) => {
+    if (!confirm('Delete this item?')) return;
+    try { await deleteDoc(doc(db,'law',id)); showToast('Deleted.'); load(); } catch(e) { showToast('Error.','error'); }
+  };
+  function cancelEdit() { editingId=null; document.getElementById('law-form').reset(); document.getElementById('form-title').textContent='Add Legal Work'; document.getElementById('l-submit').textContent='ADD WORK'; document.getElementById('l-cancel').style.display='none'; }
+  document.getElementById('l-cancel').addEventListener('click', cancelEdit);
+  load();
+</script>
+</body>
+</html>
