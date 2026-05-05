@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { IconFilm } from '../components/Icons';
 
 export default function Films() {
   const [allFilms, setAllFilms] = useState([]);
@@ -52,7 +53,7 @@ export default function Films() {
              filtered.map(item => (
                <div className="work-card" key={item.id}>
                  <div className="work-card-thumb">
-                   {item.thumbnail ? <img src={item.thumbnail} alt={item.title} loading="lazy" /> : <div className="thumb-placeholder">🎬</div>}
+                   {item.thumbnail ? <img src={item.thumbnail} alt={item.title} loading="lazy" /> : <div className="thumb-placeholder"><IconFilm /></div>}
                    <div className="work-card-overlay">
                      <a href={item.sourceLink || '#'} target="_blank" rel="noopener noreferrer" className="btn-view">View Work</a>
                    </div>

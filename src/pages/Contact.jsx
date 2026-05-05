@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDoc, doc } from 'firebase/firestore';
+import { IconEmail, IconPhone, IconWhatsApp, IconMapPin } from '../components/Icons';
 
 function showToast(msg, type = 'success') {
   let t = document.querySelector('.toast');
@@ -15,6 +16,17 @@ export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: 'collaboration', message: '' });
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState(null);
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => {
+    getDoc(doc(db, 'settings', 'site')).then(snap => {
+      if (snap.exists()) setSettings(snap.data());
+    }).catch(() => {});
+  }, []);
+
+  const email = settings.email || 'nikuzejos85@gmail.com';
+  const phone = settings.phone || '+250 795 343 820';
+  const whatsapp = settings.whatsapp || 'https://wa.me/250786283889';
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }));
 
@@ -50,10 +62,10 @@ export default function Contact() {
               <p>Whether you have a film idea, a legal discussion, or a collaboration in mind — I'd love to hear from you.</p>
               <div className="contact-links">
                 {[
-                  { href: 'mailto:nikuzejos85@gmail.com', icon: '✉️', label: 'Email', value: 'nikuzejos85@gmail.com' },
-                  { href: 'tel:+250795343820', icon: '📞', label: 'Phone', value: '+250 795 343 820' },
-                  { href: 'https://wa.me/250786283889', icon: '💬', label: 'WhatsApp', value: '+250 786 283 889', ext: true },
-                  { icon: '📍', label: 'Location', value: 'Kigali, Rwanda' },
+                  { href: `mailto:${email}`, icon: <IconEmail />, label: 'Email', value: email },
+                  { href: `tel:${phone}`, icon: <IconPhone />, label: 'Phone', value: phone },
+                  { href: whatsapp, icon: <IconWhatsApp />, label: 'WhatsApp', value: 'Chat with me', ext: true },
+                  { icon: <IconMapPin />, label: 'Location', value: 'Kigali, Rwanda' },
                 ].map((c, i) => (
                   c.href
                     ? <a key={i} href={c.href} target={c.ext ? '_blank' : undefined} rel={c.ext ? 'noopener noreferrer' : undefined} className="contact-link-item">

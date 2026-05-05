@@ -1,4 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 // ── Brand SVG Icons ──────────────────────────────────────────────────────────
 const IconInstagram = () => (
@@ -25,8 +28,28 @@ const IconEmail = () => (
     <path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/>
   </svg>
 );
+const IconPhone = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+  </svg>
+);
 
 export default function Footer() {
+  const [settings, setSettings] = useState({});
+  useEffect(() => {
+    getDoc(doc(db, 'settings', 'site')).then(snap => {
+      if (snap.exists()) setSettings(snap.data());
+    }).catch(() => {});
+  }, []);
+
+  const email = settings.email || 'nikuzejos85@gmail.com';
+  const phone = settings.phone || '+250 795 343 820';
+  const whatsapp = settings.whatsapp || 'https://wa.me/250786283889';
+  const ig = settings.instagram || 'https://www.instagram.com/thy_ink_?utm_source=qr&igsh=MXVpZ3p0a3J5MzFyNQ%3D%3D';
+  const tiktok = settings.tiktok || 'https://www.tiktok.com/@nana_phoenix7?_r=1&_t=ZS-964qNH6Acuy';
+  const quickLinksRaw = settings.quickLinks || 'Home,/\nFilms,/films\nLaw,/law\nGallery,/gallery\nAbout,/about\nContact,/contact';
+  const quickLinks = quickLinksRaw.split('\n').filter(Boolean).map(l => l.split(',').map(s => s.trim()));
+
   return (
     <footer className="footer">
       <div className="container">
@@ -35,21 +58,18 @@ export default function Footer() {
           <div className="footer-brand">
             <p className="footer-logo">NIKUZE JOSELYNE</p>
             <p className="footer-tagline">Law &amp; Film · Kigali, Rwanda</p>
-            <p className="footer-about">Between the courtroom and the camera, framing truth with purpose.</p>
+            <p className="footer-about">{settings.footerAbout || 'Between the courtroom and the camera, framing truth with purpose.'}</p>
             <div className="footer-social">
-              <a href="https://www.instagram.com/thy_ink_?utm_source=qr&igsh=MXVpZ3p0a3J5MzFyNQ%3D%3D"
-                 target="_blank" rel="noopener noreferrer" className="social-btn" aria-label="Instagram">
+              <a href={ig} target="_blank" rel="noopener noreferrer" className="social-btn" aria-label="Instagram">
                 <IconInstagram />
               </a>
-              <a href="https://www.tiktok.com/@nana_phoenix7?_r=1&_t=ZS-964qNH6Acuy"
-                 target="_blank" rel="noopener noreferrer" className="social-btn" aria-label="TikTok">
+              <a href={tiktok} target="_blank" rel="noopener noreferrer" className="social-btn" aria-label="TikTok">
                 <IconTiktok />
               </a>
-              <a href="https://wa.me/250786283889" target="_blank" rel="noopener noreferrer"
-                 className="social-btn" aria-label="WhatsApp">
+              <a href={whatsapp} target="_blank" rel="noopener noreferrer" className="social-btn" aria-label="WhatsApp">
                 <IconWhatsApp />
               </a>
-              <a href="mailto:nikuzejos85@gmail.com" className="social-btn" aria-label="Email">
+              <a href={`mailto:${email}`} className="social-btn" aria-label="Email">
                 <IconEmail />
               </a>
             </div>
@@ -59,10 +79,8 @@ export default function Footer() {
           <div className="footer-links">
             <h4>Quick Links</h4>
             <ul>
-              {[['/', 'Home'], ['/films', 'Films'], ['/law', 'Law'],
-                ['/gallery', 'Gallery'], ['/about', 'About'], ['/contact', 'Contact']
-              ].map(([to, label]) => (
-                <li key={to}><Link to={to}>{label}</Link></li>
+              {quickLinks.map(([label, to], i) => (
+                to && <li key={i}><Link to={to}>{label}</Link></li>
               ))}
             </ul>
           </div>
@@ -70,9 +88,15 @@ export default function Footer() {
           {/* Contact */}
           <div className="footer-contact">
             <h4>Contact</h4>
-            <p>📧 <a href="mailto:nikuzejos85@gmail.com">nikuzejos85@gmail.com</a></p>
-            <p>📞 <a href="tel:+250795343820">+250 795 343 820</a></p>
-            <p>💬 <a href="https://wa.me/250786283889" target="_blank" rel="noopener noreferrer">WhatsApp</a></p>
+            <div style={{display:'flex',gap:'.5rem',alignItems:'center',marginBottom:'.6rem',color:'var(--white-muted)'}}>
+              <IconEmail /> <a href={`mailto:${email}`}>{email}</a>
+            </div>
+            <div style={{display:'flex',gap:'.5rem',alignItems:'center',marginBottom:'.6rem',color:'var(--white-muted)'}}>
+              <IconPhone /> <a href={`tel:${phone}`}>{phone}</a>
+            </div>
+            <div style={{display:'flex',gap:'.5rem',alignItems:'center',marginBottom:'.6rem',color:'var(--white-muted)'}}>
+              <IconWhatsApp /> <a href={whatsapp} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            </div>
           </div>
         </div>
 

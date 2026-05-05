@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { IconImage } from '../components/Icons';
 
 export default function Gallery() {
   const [items, setItems] = useState([]);

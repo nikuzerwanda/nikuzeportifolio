@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { IconFilm, IconEdit, IconTrash } from '../components/Icons';
 
 function toast(msg, type = 'success') {
   let t = document.querySelector('.adm-toast');
@@ -87,14 +88,14 @@ export default function AdminFilms() {
           <div className="panel-body" style={{ padding: 0 }}>
             {items.length === 0 ? <p className="empty-state">No films yet.</p> : items.map(item => (
               <div className="item-card" key={item.id}>
-                <div className="item-thumb">{item.thumbnail ? <img src={item.thumbnail} alt="" style={{ width: 52, height: 52, objectFit: 'cover' }} /> : '🎬'}</div>
+                <div className="item-thumb">{item.thumbnail ? <img src={item.thumbnail} alt="" style={{ width: 52, height: 52, objectFit: 'cover' }} /> : <IconFilm />}</div>
                 <div className="item-info">
                   <div className="item-title">{item.title}</div>
                   <div className="item-meta">{item.category} · <span className={`status-badge ${item.status}`}>{item.status}</span></div>
                 </div>
                 <div className="item-actions">
-                  <button className="btn-icon" onClick={() => startEdit(item)}>✏️</button>
-                  <button className="btn-icon danger" onClick={() => del(item.id)}>🗑️</button>
+                  <button className="btn-icon" onClick={() => startEdit(item)}><IconEdit /></button>
+                  <button className="btn-icon danger" onClick={() => del(item.id)}><IconTrash /></button>
                 </div>
               </div>
             ))}

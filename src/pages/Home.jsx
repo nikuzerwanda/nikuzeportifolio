@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, getDocs, query, where, limit, doc, getDoc } from 'firebase/firestore';
+import { IconScale, IconFilm } from '../components/Icons';
 
 function useInView(ref) {
   useEffect(() => {
@@ -85,7 +86,7 @@ export default function Home() {
                 <div className="work-card-thumb">
                   {item.thumbnail
                     ? <img src={item.thumbnail} alt={item.title} loading="lazy" />
-                    : <div className="thumb-placeholder">🎬</div>
+                    : <div className="thumb-placeholder"><IconFilm /></div>
                   }
                   <div className="work-card-overlay">
                     <a href={item.sourceLink || '#'} target="_blank" rel="noopener noreferrer" className="btn-view">View Work</a>
@@ -109,14 +110,14 @@ export default function Home() {
         <div className="container">
           <div className="dual-grid fade-up">
             <div className="dual-card">
-              <div className="dual-icon">⚖️</div>
+              <div className="dual-icon"><IconScale /></div>
               <h3>The Law Student</h3>
               <p>Studying how justice is written, argued, and sometimes broken. Exploring law, society, and human rights in Rwanda and beyond.</p>
               <Link to="/law" className="btn-link">Explore Legal Work →</Link>
             </div>
             <div className="dual-divider" />
             <div className="dual-card">
-              <div className="dual-icon">🎬</div>
+              <div className="dual-icon"><IconFilm /></div>
               <h3>The Filmmaker</h3>
               <p>Framing truth through the lens. Documentary storytelling, short films, and visual narratives that speak to the human experience.</p>
               <Link to="/films" className="btn-link">View Films →</Link>

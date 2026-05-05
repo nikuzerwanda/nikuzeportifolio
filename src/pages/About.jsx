@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { IconUser, IconEye, IconTarget } from '../components/Icons';
 
 export default function About() {
   const [d, setD] = useState({});
@@ -28,7 +29,7 @@ export default function About() {
             <div className="about-image-wrap">
               {d.photoUrl
                 ? <img src={d.photoUrl} alt={d.name || 'Nikuze Joselyne'} />
-                : <div className="about-image-placeholder">👤</div>
+                : <div className="about-image-placeholder"><IconUser /></div>
               }
             </div>
             <div className="about-text">
@@ -55,13 +56,13 @@ export default function About() {
         <div className="container">
           <div className="dual-grid">
             <div className="dual-card">
-              <div className="dual-icon">🔭</div>
+              <div className="dual-icon"><IconEye /></div>
               <h3>{d.visionTitle || 'Vision'}</h3>
               <p>{d.visionText || 'To use the power of storytelling — both legal and cinematic — to advocate for justice, amplify silenced voices, and document the truth of our time.'}</p>
             </div>
             <div className="dual-divider" />
             <div className="dual-card">
-              <div className="dual-icon">🎯</div>
+              <div className="dual-icon"><IconTarget /></div>
               <h3>{d.missionTitle || 'Mission'}</h3>
               <p>{d.missionText || 'To create films and legal frameworks that hold power accountable, give communities a voice, and bridge the gap between art and justice in Rwanda and Africa.'}</p>
             </div>

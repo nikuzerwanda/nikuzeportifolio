@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { IconScale, IconEdit, IconTrash } from '../components/Icons';
 
 function toast(msg, type='success'){let t=document.querySelector('.adm-toast');if(!t){t=document.createElement('div');t.className='adm-toast';t.style.cssText='position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;padding:.8rem 1.3rem;background:#161616;border:1px solid #222;font-family:Space Grotesk,sans-serif;font-size:.68rem;letter-spacing:.1em;color:#e8e5e0;transform:translateY(20px);opacity:0;transition:all .3s;';document.body.appendChild(t);}t.textContent=msg;t.style.borderColor=type==='error'?'#e05555':'#c9a96e';t.style.color=type==='error'?'#e05555':'#c9a96e';requestAnimationFrame(()=>requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateY(0)';}));setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(20px)';},3000);}
 
@@ -58,11 +59,11 @@ export default function AdminLaw() {
           <div className="panel-body" style={{padding:0}}>
             {items.length===0?<p className="empty-state">No items yet.</p>:items.map(item=>(
               <div className="item-card" key={item.id}>
-                <div className="item-thumb">⚖️</div>
+                <div className="item-thumb"><IconScale /></div>
                 <div className="item-info"><div className="item-title">{item.title}</div><div className="item-meta">{item.category} · <span className={`status-badge ${item.status}`}>{item.status}</span></div></div>
                 <div className="item-actions">
-                  <button className="btn-icon" onClick={()=>{setEditId(item.id);setForm({title:item.title||'',category:item.category||'Human Rights',sourceLink:item.sourceLink||'',description:item.description||'',status:item.status||'visible'});}}>✏️</button>
-                  <button className="btn-icon danger" onClick={()=>del(item.id)}>🗑️</button>
+                  <button className="btn-icon" onClick={()=>{setEditId(item.id);setForm({title:item.title||'',category:item.category||'Human Rights',sourceLink:item.sourceLink||'',description:item.description||'',status:item.status||'visible'});}}><IconEdit /></button>
+                  <button className="btn-icon danger" onClick={()=>del(item.id)}><IconTrash /></button>
                 </div>
               </div>
             ))}
