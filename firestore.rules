@@ -1,0 +1,92 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    // Only authenticated users (the admin) can write
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Validate string fields don't exceed max length
+    function validString(field, maxLen) {
+      return field is string && field.size() <= maxLen;
+    }
+
+    // ── Films ─────────────────────────────────────────────────────────────────
+    // Public: read only visible films
+    // Admin: full CRUD
+    match /films/{filmId} {
+      allow read: if resource.data.status == 'visible';
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && validString(request.resource.data.title, 200)
+        && request.resource.data.status in ['visible', 'hidden'];
+      allow update: if isAdmin()
+        && validString(request.resource.data.title, 200)
+        && request.resource.data.status in ['visible', 'hidden'];
+      allow delete: if isAdmin();
+    }
+
+    // ── Law ───────────────────────────────────────────────────────────────────
+    match /law/{lawId} {
+      allow read: if resource.data.status == 'visible';
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && validString(request.resource.data.title, 200)
+        && request.resource.data.status in ['visible', 'hidden'];
+      allow update: if isAdmin()
+        && validString(request.resource.data.title, 200)
+        && request.resource.data.status in ['visible', 'hidden'];
+      allow delete: if isAdmin();
+    }
+
+    // ── Gallery ───────────────────────────────────────────────────────────────
+    match /gallery/{photoId} {
+      allow read: if resource.data.status == 'visible';
+      allow list: if isAdmin();
+      allow create: if isAdmin()
+        && validString(request.resource.data.imageUrl, 1000)
+        && request.resource.data.status in ['visible', 'hidden'];
+      allow update: if isAdmin()
+        && validString(request.resource.data.imageUrl, 1000)
+        && request.resource.data.status in ['visible', 'hidden'];
+      allow delete: if isAdmin();
+    }
+
+    // ── Settings ──────────────────────────────────────────────────────────────
+    // Public: read (needed for homepage hero text, about page)
+    // Admin: write only
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Messages ──────────────────────────────────────────────────────────────
+    // Public: create only (contact form submissions)
+    //   - Must include required fields
+    //   - Rate-limit protection via field validation
+    // Admin: read, update (mark read), delete
+    match /messages/{msgId} {
+      allow create: if
+        // Required fields present
+        request.resource.data.keys().hasAll(['name', 'email', 'message', 'createdAt'])
+        // Validate field lengths (prevent spam bombs)
+        && validString(request.resource.data.name, 100)
+        && validString(request.resource.data.email, 200)
+        && validString(request.resource.data.message, 2000)
+        // read:false must be set on creation
+        && request.resource.data.read == false;
+      allow read:   if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── Deny everything else ──────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

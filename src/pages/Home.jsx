@@ -50,10 +50,11 @@ export default function Home() {
           <p className="hero-eyebrow">Rwandan · Law Student · Filmmaker</p>
           <h1 className="hero-title">
             <span className="title-line">{heroLines[0] || 'FRAMING'}</span>
-            <span className="title-line accent">{heroLines[1] || 'TRUTH'}</span>
+            <span className="title-line">{heroLines[1] || 'TRUTH'}</span>
             <span className="title-line">{heroLines.slice(2).join(' ') || 'THROUGH FILM'}</span>
           </h1>
           <p className="hero-subtitle">NIKUZE JOSELYNE</p>
+          <div className="hero-divider" />
           <p className="hero-desc">{settings.heroSubtitle || 'I live between the courtroom and the camera — framing truth through film while learning how justice is written, argued, and sometimes broken.'}</p>
           <div className="hero-actions">
             <Link to="/films" className="btn btn-primary">EXPLORE MY WORK</Link>

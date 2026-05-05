@@ -1,5 +1,5 @@
 /* Admin Design System */
-:root{--adm-bg:#0d0d0d;--adm-sidebar:#111;--adm-card:#161616;--adm-border:#222;--adm-text:#e8e5e0;--adm-muted:#6a6760;--adm-faint:#333;--adm-accent:#c9a96e;}
+:root{--adm-bg:#0a0a0a;--adm-sidebar:#0e0e0e;--adm-card:#141414;--adm-border:#1e1e1e;--adm-text:#eeebe6;--adm-muted:#6a6760;--adm-faint:#2a2a2a;--adm-accent:#c9a96e;}
 .admin-body{background:var(--adm-bg);color:var(--adm-text);font-family:'Inter',sans-serif;font-weight:300;min-height:100vh;}
 /* Layout */
 .admin-layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;}
